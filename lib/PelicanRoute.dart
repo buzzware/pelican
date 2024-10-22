@@ -15,12 +15,42 @@ class PelicanRoute {
   }
 
   PelicanRoute.fromPath(String path) {
-    var parts = path.split('/');
-    if (parts.isNotEmpty && parts[0].isEmpty) {
-      parts.removeAt(0);
+    List<String> parts;
+    if (path == '/') {
+      parts = [];
+    } else {
+      parts = path.split('/');
+      if (parts.isNotEmpty && parts[0].isEmpty)
+        parts.removeAt(0);
     }
     _segments = List.unmodifiable(parts.map((p)=>PelicanRouteSegment.fromPathSegment(p)));
   }
+
+//   void push(String segmentPath) {
+//     var segment = PelicanRouteSegment.fromPathSegment(segmentPath);
+//     pushSegment(segment);
+//   }
+//
+//   void pushSegment(PelicanRouteSegment segment) {
+//     if (_route==null) {
+//       route = PelicanRoute([segment]);
+//     } else {
+//       route = route!.pushSegment(segment);
+//     }
+//   }
+//
+//   PelicanRouteSegment pop() {
+//     if (_route?.segments.isEmpty ?? true) {
+//       throw Exception("Can't pop when stack is empty");
+//     }
+//     final poppedItem = _route!.segments.isNotEmpty ? _route!.segments.last : null;
+//     route = _route!.popSegment();
+//     print("pop ${poppedItem!.toPath()}");
+//     notifyListeners();
+//     return poppedItem;
+//   }
+
+
 
   // returns a new instance with the extra segment
   PelicanRoute pushSegment(PelicanRouteSegment segment) {
@@ -33,6 +63,12 @@ class PelicanRoute {
     }
     final poppedItem = segments.last;
     return PelicanRoute(segments.sublist(0,segments.length-1));
+  }
+
+  PelicanRoute remove(String name) {
+    var segs = List<PelicanRouteSegment>.from(segments);
+    segs.removeWhere((s) => s.name==name);
+    return PelicanRoute(segs);
   }
 
   bool equals(PelicanRoute other, {bool ignoreOptions = true}) {

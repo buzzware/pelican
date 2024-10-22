@@ -39,7 +39,7 @@ void main() {
   // SetupModels.call();
 
 
-  test('PelicanRoute.fromPath',(){
+  test('PelicanRoute.fromPath testRouteUrl',(){
     var route = PelicanRoute.fromPath(testRouteUrl);
     expect(route.segments.length,1);
     expect(route.segments[0].name,'auth_email');
@@ -47,6 +47,10 @@ void main() {
     expect(route.segments[0].options['auth_link']!.isNotEmpty,true);
   });
 
+  test('PelicanRoute.fromPath root',(){
+    var route = PelicanRoute.fromPath('/');
+    expect(route.segments.length,0);
+  });
 
   test('redirects',() async {
     var table = RouteTable(
