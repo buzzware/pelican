@@ -13,7 +13,7 @@ class SegmentPageContext {
   final PelicanRoute route;
   final PelicanRouteSegment? segment;
 
-  SegmentPageContext(this.route,this.segment);
+  const SegmentPageContext(this.route,this.segment);
 
   SegmentPageResult page(Widget pageWidget) {
     return SegmentPageResult(pageWidget: pageWidget);
@@ -38,7 +38,7 @@ class PathRedirectResult {
 class PathRedirectContext {
   final String path;
 
-  PathRedirectContext(
+  const PathRedirectContext(
       this.path
   );
 
@@ -47,7 +47,7 @@ class PathRedirectContext {
   }
 
   PathRedirectResult toRootPage(String pageName) {
-    return PathRedirectResult(path: '/'+pageName);
+    return PathRedirectResult(path: '/$pageName');
   }
 
   PathRedirectResult cancel() {
@@ -67,7 +67,7 @@ class PathRedirect {
       this.handler
   );
   bool matchesPath(String currPath) {
-    return currPath==this.path;
+    return currPath==path;
   }
 
   static fromTo(String fromPath, String toPath) {
@@ -112,8 +112,9 @@ class RouteTable {
 
   SegmentPageBuilder? matchRoute(PelicanRouteSegment segment) {
     for (var s in segments) {
-      if (s.segment.name==segment.name)
+      if (s.segment.name==segment.name) {
         return s.builder;
+      }
     }
     return null;
   }
@@ -121,8 +122,9 @@ class RouteTable {
   Future<SegmentPageResult> executeSegment(SegmentPageContext context) async {
     print("executeSegment ${context.segment!.toPath()}");
     var builder = matchRoute(context.segment!);
-    if (builder==null)
+    if (builder==null) {
       throw Exception("Segment route not matched");
+    }
     SegmentPageResult buildResult = await builder(context);
     return buildResult;
   }
@@ -133,10 +135,11 @@ class RouteTable {
     do {
       PathRedirectResult? result;
       for (var r in redirects) {
-        if (!r.matchesPath(currPath))
+        if (!r.matchesPath(currPath)) {
           continue;
+        }
         print("executeRedirects: BEFORE handler ${r.path}");
-        result = await r.handler(new PathRedirectContext(currPath));
+        result = await r.handler(PathRedirectContext(currPath));
         if (result.cancel) {
           print("executeRedirects: Cancelled Path ${r.path}");
           return null;
@@ -152,7 +155,7 @@ class RouteTable {
         break;
       }
       if (result==null) {
-        print("executeRedirects: Returning Path ${currPath} as is");
+        print("executeRedirects: Returning Path $currPath as is");
         return currPath;
       }
       currPath = result.path!;
@@ -162,12 +165,14 @@ class RouteTable {
   Future<PelicanRoute?> executeRedirectsRoute(PelicanRoute route) async {
     var path = route.toPath();
     var redirected = await executeRedirects(path);
-    if (redirected==null)
+    if (redirected==null) {
       return null;
-    if (redirected == path)
+    }
+    if (redirected == path) {
       return route;
-    else
+    } else {
       return PelicanRoute.fromPath(redirected);
+    }
   }
 
 }
@@ -193,10 +198,11 @@ class PelicanRouteParser extends RouteInformationParser<PelicanRouterState> {
   // PelicanRoute -> RouteInformation
   @override
   RouteInformation? restoreRouteInformation(PelicanRouterState configuration) {
-    if (configuration.route==null)
+    if (configuration.route==null) {
       return null;
+    }
     var path = configuration.route!.toPath();
-    print('restoreRouteInformation PelicanRoute ${path} -> RouteInformation');
+    print('restoreRouteInformation PelicanRoute $path -> RouteInformation');
     var uri = Uri.parse(path);
     return RouteInformation(
       uri: uri,
@@ -219,7 +225,7 @@ class PelicanRouter extends RouterDelegate<PelicanRouterState> with ChangeNotifi
 
   late final List<NavigatorObserver> observers;
 
-  String _initialPath;
+  final String _initialPath;
   bool _stateRouteInitialised = false;
 
   PelicanRouter(
@@ -267,16 +273,18 @@ class PelicanRouter extends RouterDelegate<PelicanRouterState> with ChangeNotifi
   @override
   Future<void> setNewRoutePath(PelicanRouterState routerState) async {
     print("setNewRoutePath ${routerState.route?.toPath()}");
-    if (PelicanRoute.same(_state.route,routerState.route))
+    if (PelicanRoute.same(_state.route,routerState.route)) {
       return;
+    }
     _state.route = routerState.route;
   }
 
   Future<void> initStateRoute() async {
     print('initStateRoute');
     var newPath = await routeTable.executeRedirects(_initialPath);
-    if (newPath != null)
+    if (newPath != null) {
       _state.route = PelicanRoute.fromPath(newPath);
+    }
   }
 
   Page<dynamic> _buildPage(String key, Widget widget) {
@@ -341,7 +349,7 @@ class PelicanRouter extends RouterDelegate<PelicanRouterState> with ChangeNotifi
     return FutureBuilder(
       future: buildPages(context),
       initialData: [
-        MaterialPage<dynamic>(child: Container(
+        MaterialPage<dynamic>(child: SizedBox(
           width: double.infinity,
           height: double.infinity,
           //child: Text('Please Wait')
@@ -354,12 +362,12 @@ class PelicanRouter extends RouterDelegate<PelicanRouterState> with ChangeNotifi
           return Navigator(
             key: navigatorKey,
             transitionDelegate: NoAnimationTransitionDelegate(),
-            pages: snapshot.data! as List<Page<dynamic>>, // List<Page<dynamic>>.from([BlankPage()]),
+            pages: snapshot.data!, // List<Page<dynamic>>.from([BlankPage()]),
             onPopPage: _onPopPage,
             observers: observers,
           );
         } else {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
       }
     );
@@ -377,11 +385,13 @@ class PelicanRouter extends RouterDelegate<PelicanRouterState> with ChangeNotifi
 
   Future<void> goto(String path) async {
     var newPath = await routeTable.executeRedirects(path);
-    if (newPath==null)
+    if (newPath==null) {
       return;
+    }
     var route = PelicanRoute.fromPath(newPath);
-    if (PelicanRoute.same(route,_state.route))
+    if (PelicanRoute.same(route,_state.route)) {
       return;
+    }
     _state.route = route;
   }
 
@@ -396,11 +406,13 @@ class PelicanRouter extends RouterDelegate<PelicanRouterState> with ChangeNotifi
   }
 
   Page? getPage(String segmentName) {
-    if (_state.route==null)
+    if (_state.route==null) {
       return null;
+    }
     for (var i=_state.route!.segments.length-1; i>=0; i--) {
-      if (_cacheRoute!.segments.length > i && _cacheRoute!.segments[i].name==segmentName)
+      if (_cacheRoute!.segments.length > i && _cacheRoute!.segments[i].name==segmentName) {
         return _cachePages![i];
+      }
     }
     return null;
   }
@@ -410,12 +422,14 @@ class PelicanRouter extends RouterDelegate<PelicanRouterState> with ChangeNotifi
   }
 
   void replaceParam(String param, String? value) {
-    if (_state.route?.segments.isEmpty ?? true)
+    if (_state.route?.segments.isEmpty ?? true) {
       throw Exception("Can't replaceParam on an empty route");
+    }
     var leaf = _state.route!.segments.last;
     var params = leaf.params;
-    if (params[param]==value)
+    if (params[param]==value) {
       return;
+    }
 
     params = Map.from(leaf.params);
     params[param] = value;

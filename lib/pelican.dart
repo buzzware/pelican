@@ -1,10 +1,6 @@
 library pelican;
 
-import 'package:collection/src/iterable_extensions.dart';
-import 'package:flutter/widgets.dart';
 
-import 'package:collection/src/iterable_extensions.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 //import 'package:get_it/get_it.dart';
 
@@ -15,10 +11,7 @@ import 'package:flutter/material.dart';
 // import 'PelicanUtilities.dart';
 // import 'TransitionDelegate.dart';
 
-import 'package:flutter/widgets.dart';
 
-import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 
 part 'PelicanRoute.dart';
 part 'PelicanRouter.dart';

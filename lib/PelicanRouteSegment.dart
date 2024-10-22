@@ -49,8 +49,9 @@ class PelicanRouteSegment {
 
   static String getName(String segment) {
     var parts = segment.split(';');
-    if (parts.isEmpty)
+    if (parts.isEmpty) {
       throw Exception('segment is empty');
+    }
     return parts[0];
   }
 
@@ -65,8 +66,9 @@ class PelicanRouteSegment {
   }
 
   String toPath({PelicanRouteSegment? definition}) {
-    if (definition!=null && definition.name != name)
+    if (definition!=null && definition.name != name) {
       throw Exception('definition name must match path name');
+    }
 
     var nameAndPars = [name];
     var ops = List<String>.empty(growable: true);

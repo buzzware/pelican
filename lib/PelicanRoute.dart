@@ -16,8 +16,9 @@ class PelicanRoute {
 
   PelicanRoute.fromPath(String path) {
     var parts = path.split('/');
-    if (parts.isNotEmpty && parts[0].isEmpty)
+    if (parts.isNotEmpty && parts[0].isEmpty) {
       parts.removeAt(0);
+    }
     _segments = List.unmodifiable(parts.map((p)=>PelicanRouteSegment.fromPathSegment(p)));
   }
 
@@ -27,8 +28,9 @@ class PelicanRoute {
   }
 
   PelicanRoute popSegment() {
-    if (segments.isEmpty)
+    if (segments.isEmpty) {
       throw Exception("Can't pop when stack is empty");
+    }
     final poppedItem = segments.last;
     return PelicanRoute(segments.sublist(0,segments.length-1));
   }
