@@ -39,6 +39,7 @@ class MyApp extends StatelessWidget {
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
       routerDelegate: AppCommon.router,
       routeInformationParser: AppCommon.router.parser,
+      routeInformationProvider: AppCommon.router.routeProvider,
     );
   }
 }
