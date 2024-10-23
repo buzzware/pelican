@@ -58,7 +58,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   ): super() {
     parser = PelicanRouteParser(this);
     navigatorKey = GlobalKey<NavigatorState>();
-    routeProvider = platformRouteInformationProviderWithInitialPath(initialPath);
+    //routeProvider = platformRouteInformationProviderWithInitialPath(initialPath);
     // if (!validateInitialPath(_initialPath)) {
     //   throw ArgumentError("$_initialPath must match page(s)");
     // }
