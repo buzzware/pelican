@@ -103,7 +103,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
     }
     _state = route;
     _pages = await buildPages();
-    //notifyListeners();
+    notifyListeners();
   }
 
   // Future<void> initStateRoute() async {
