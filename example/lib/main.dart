@@ -1,3 +1,4 @@
+import 'package:example/AppRoutes.dart';
 import 'package:flutter/material.dart';
 import 'package:pelican/pelican.dart';
 
@@ -5,12 +6,16 @@ import 'AppCommon.dart';
 
 void main() {
   AppCommon.reset();
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
 
   // This widget is the root of your application.
   @override
@@ -39,7 +44,7 @@ class MyApp extends StatelessWidget {
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
       routerDelegate: AppCommon.router,
       routeInformationParser: AppCommon.router.parser,
-      //routeInformationProvider: AppCommon.router.routeProvider,
+      routeInformationProvider: PelicanRouter.platformRouteInformationProviderWithInitialPath(AppRoutes.TRIAGE_PATH)
     );
   }
 }

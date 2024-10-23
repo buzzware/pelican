@@ -20,7 +20,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
 
   LoadingPageBuilder? loadingPageBuilder;
 
-  late RouteInformationProvider routeProvider;
+  //late RouteInformationProvider routeProvider;
   //final String _initialPath;
   //bool _stateRouteInitialised = false;
 
