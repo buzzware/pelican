@@ -3,6 +3,15 @@ import 'package:flutter/material.dart';
 class PageOne extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(color: Colors.blue);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Page One'),
+        automaticallyImplyLeading: true,  // automatic back button
+      ),
+      body: Container(
+          color: Colors.blue,
+          child: Center(child: Text('Page Content'))
+      )
+    );
   }
 }
