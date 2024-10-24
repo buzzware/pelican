@@ -227,4 +227,16 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
     var segment = leaf.copyWith(params: Map.unmodifiable(params));
     replaceSegment(segment);
   }
+
+  void appendPathRedirect(PathRedirect redirect) {
+    routeTable.redirects.add(redirect);
+  }
+  
+  void prependPathRedirect(PathRedirect redirect) {
+    routeTable.redirects.insert(0,redirect);
+  }
+  
+  void removePathRedirect(PathRedirect redirect) {
+    routeTable.redirects.remove(redirect);
+  }
 }
