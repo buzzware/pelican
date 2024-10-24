@@ -1,7 +1,42 @@
 name: pelican
 description: "Advanced navigator for Flutter"
 version: 0.1.0
-homepage:
+homepage: https://github.com/buzzware/pelican
+repository: https://github.com/buzzware/pelican
+issue_tracker: https://github.com/buzzware/pelican/issues
+#documentation: https://your-documentation-url.com
+
+authors:
+  - gary@buzzware.com.au
+maintainers:
+  - Gary McGhee <gary@buzzware.com.au>
+
+license: MIT
+
+example:
+  path: example/               # Path to example code
+
+topics:                        # New feature for package categorization
+  - navigation
+
+#funding:                       # Support information
+#  - https://github.com/sponsors/username
+#  - https://opencollective.com/package_name
+
+platforms:                     # Supported platforms
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
+## Screenshots (optional but recommended)
+#screenshots:
+#  - description: 'Main screen of the app'
+#    path: screenshots/main.png
+#  - description: 'Settings screen'
+#    path: screenshots/settings.png
 
 environment:
   sdk: ^3.5.2
