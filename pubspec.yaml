@@ -1,6 +1,6 @@
 name: pelican
-description: "A new Flutter package project."
-version: 0.0.1
+description: "Advanced navigator for Flutter"
+version: 0.1.0
 homepage:
 
 environment:

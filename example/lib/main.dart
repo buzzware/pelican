@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
       routerDelegate: AppCommon.router,
       routeInformationParser: AppCommon.router.parser,
-      routeInformationProvider: routeInformationProvider
+      //routeInformationProvider: routeInformationProvider
     );
   }
 }
