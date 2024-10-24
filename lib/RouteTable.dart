@@ -58,7 +58,7 @@ class PathRedirectContext {
 }
 
 class PathRedirect {
-  String path;
+  String? path;
   Future<PathRedirectResult> Function(PathRedirectContext ctx) handler;
   RegExp? pattern;
   PathRedirect(
@@ -68,7 +68,7 @@ class PathRedirect {
   );
   bool matchesPath(String currPath) {
     if (pattern!=null) {
-      return pattern.hasMatch(currPath);
+      return pattern!.hasMatch(currPath);
     } else if (path!=null) {
       return currPath == path;
     }
@@ -82,7 +82,7 @@ class PathRedirect {
     return PathRedirect(fromPath, (ctx) async => ctx.toRootPage(toPage));
   }
   static fromPattern(RegExp pattern, Future<PathRedirectResult> Function(PathRedirectContext ctx) handler) {
-    return PathRedirect(null, pattern: pattern, handler: handler);
+    return PathRedirect(null, handler, pattern: pattern);
   }
 }
 
