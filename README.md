@@ -29,6 +29,8 @@ None of the available options met my core requirements, being :
 I make no claim of the completeness or quality of this repository, but I use it in production, and develop it as required by the application.
 Some intended features may not be properly implemented yet.
 
+Even less mature DotNet version (used with Avalonia) https://github.com/buzzware/PelicanDotNet
+
 Acknowledgements
 * https://pub.dev/packages/beamer
 * https://pub.dev/packages/routemaster
