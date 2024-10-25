@@ -8,27 +8,31 @@ I have spent a lot of time with routing in other app development environments, l
 None of the available options met my core requirements, being :
 
 * async everything
-* an expressive route table (of segments)
+* expressive route table of segments mapped to pages, and full path redirects
 * no code generation
 * parameters and options per segment. Parameters affect routing, options do not.
 * two-way serialization between the page stack and the route (like Rails and Ember.js)
 * defined segments, dynamically constructed route (of segments)
 * no heirarchy in the definition of segments means segments/pages can be dynamically constructed in any order within a route/stack
-* full-route redirects
+* full-route (any string) redirects with arbitrary logic. Redirect to any path, and redirect again ad infinitum
+* symbolic routes - for example you can call `router.goto("/post_login_triage")` and then define async triage logic for that path to determine what path or page to redirect to next
+* path redirects can return a new path, pass to the next match, or cancel routing
+* path redirects can be matched as an exact string or a RegExp
 * segment redirects ("aliases") - future feature
 * ability to goto any route, and intelligently create or destroy pages as required
 * a stack of pages, not a history of routes. Back = pop(), or you can goto any route you've stored.
 * uses Navigator 2.0 as it was intended
 
-If you've written a popular Flutter routing package, go ahead and steal my ideas. I don't really want to be a package maintainer.
-
 I make no claim of the completeness or quality of this repository, but I use it in production, and develop it as required by the application.
-This is not the latest version, but I intend to update it from my production app.
-Some intended features are not properly implemented yet.
+Some intended features may not be properly implemented yet.
 
 Acknowledgements
 * https://pub.dev/packages/beamer
 * https://pub.dev/packages/routemaster
+* https://pub.dev/packages/go_router
+* https://guides.emberjs.com/release/routing
+* https://guides.rubyonrails.org/routing.html
+* https://medium.com/flutter/learning-flutters-new-navigation-and-routing-system-7c9068155ade
 
 
 ## Documentation
@@ -47,7 +51,7 @@ Examples
 
 ```Books+search=hardy```
 
-* A route is zero or more segments, joined by /
+* A route path begins with a /, followed by zero or more segments, separated by /'s
 
 For example :
 
@@ -81,7 +85,7 @@ PelicanRouter router = PelicanRouter(
           BooksListScreen(
             books: books,
             onTapped: (book) {
-              router.state.push("book;id=${book.id}");
+              router.push("book;id=${book.id}");
             }
           )
         );
@@ -91,9 +95,10 @@ PelicanRouter router = PelicanRouter(
         return _.page(BookDetailsScreen(book: book));
       }
     },
-    redirects: {
-      '/': (_) async => '/books'
-    }
+    redirects: [
+      PageRedirect('/', (_) async => _.to('/books')),
+      PageRedirect.fromPattern(RegExp('http'), (_) async => ... ),  // handle deep links
+    ]
   ),
 );
 ```
