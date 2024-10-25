@@ -1,6 +1,8 @@
 # Pelican - another Flutter Router
 
-The Pelican is a large migratory bird https://en.wikipedia.org/wiki/Australian_pelican
+The Pelican is a large bird that navigates around Australia and South East Asia https://en.wikipedia.org/wiki/Australian_pelican 
+
+![Pelican](https://en.wikipedia.org/wiki/Australian_pelican#/media/File:Pelecanus_conspicillatus_-Australia_-8.jpg)
 
 ## Why another Flutter router ?
 
