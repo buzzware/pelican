@@ -15,6 +15,7 @@ None of the available options met my core requirements, being :
 * defined segments, dynamically constructed route (of segments)
 * no heirarchy in the definition of segments means segments/pages can be dynamically constructed in any order within a route/stack
 * full-route (any string) redirects with arbitrary logic. Redirect to any path, and redirect again ad infinitum
+* match and handle deep links with a redirect handler
 * symbolic routes - for example you can call `router.goto("/post_login_triage")` and then define async triage logic for that path to determine what path or page to redirect to next
 * path redirects can return a new path, pass to the next match, or cancel routing
 * path redirects can be matched as an exact string or a RegExp
