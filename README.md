@@ -38,6 +38,8 @@ Acknowledgements
 
 ## Documentation
 
+See example app https://github.com/buzzware/pelican/tree/main/example
+
 ### Segment Paths
 
 * A segment path looks like
@@ -74,7 +76,7 @@ The "Settings" page can be shown anywhere on the stack, and even multiple times 
 
 This specifies :
 * a builder for each segment. The segment definition string optionally defines parameters and options and their order. The builder uses the passed context object (_) for context information and performing actions
-* a handler for each redirect. The entire route path is matched against the provided redirect paths, and then a handler returns the new path string.
+* a handler for each redirect. The entire route path is matched against the provided redirects by path or RegExp, and then a handler returns the action that should be taken.
 
 ```
 PelicanRouter router = PelicanRouter(
@@ -107,10 +109,10 @@ PelicanRouter router = PelicanRouter(
 
 Examples :
 
-```router.state.push("book;id=${book.id}")```
+```router.push("book;id=${book.id}")```
 
-```router.state.pop()```
+```router.pop()```
 
-```router.state.goto('/login')```
+```router.goto('/login')```
 
 
