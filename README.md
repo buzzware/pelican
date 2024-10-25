@@ -78,7 +78,6 @@ This specifies :
 
 ```
 PelicanRouter router = PelicanRouter(
-  '/books',
   RouteTable(
     {
       'books': (_) async {
