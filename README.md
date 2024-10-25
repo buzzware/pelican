@@ -4,6 +4,8 @@ The Pelican is a large bird that navigates around Australia and South East Asia 
 
 ![640px-Pelecanus_conspicillatus_-Australia_-8](https://github.com/user-attachments/assets/5bc30e5f-7a2a-4be4-9192-a56f4d410741)
 
+By Geoff Penaluna - originally posted to Flickr as Pelican, CC BY 2.0, https://commons.wikimedia.org/w/index.php?curid=8442187
+
 ## Why another Flutter router ?
 
 I have spent a lot of time with routing in other app development environments, like Rails, Ember and Xamarin and researched Flutter packages and the Navigator 2.0 API.
