@@ -1,4 +1,4 @@
-# Pelican - another Flutter Router
+# Pelican - Navigation Router for Flutter
 
 The Pelican is a large bird that navigates around Australia and South East Asia https://en.wikipedia.org/wiki/Australian_pelican 
 
