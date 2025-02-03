@@ -26,7 +26,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
         )
     );
   }
-  
+
   PelicanRouter(
       this.routeTable,
       {
@@ -46,6 +46,10 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   @override
   PelicanRoute? get currentConfiguration {
     return _state;
+  }
+
+  Widget? get currentPage {
+    return (_cachePages?.lastOrNull as MaterialPage?)?.child;
   }
 
   @override
@@ -79,6 +83,13 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
     );
   }
 
+  Future<(SegmentPageResult,Page<dynamic>)> _buildPageFromSegment(segment) async {
+    var prc = SegmentPageContext(_state!, segment);
+    var buildResult = await routeTable.executeSegment(prc);
+    var page = _buildPage(segment.toPath(), buildResult.pageWidget!);
+    return (buildResult,page);
+  }
+
   Future<List<Page<dynamic>>> buildPages() async {
     print('BEGIN Router.buildPages');
     print("_cachePages is ${_cachePages==null ? 'not' : ''} set");
@@ -87,17 +98,25 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
     for (var i=0; i<_state!.segments.length; i++) {
       var segment = _state!.segments[i];
       Page page;
+      // this approach isn't complete because any childSegments will mean  _cachePages is longer than _cacheRoute
+      // Another approach is to store the child page on the parent page using IParentPage that must be implemented
       if (useCached && _cacheRoute!.segments.length>i && segment.equals(_cacheRoute!.segments[i])) {
         page = _cachePages![i];
         print("Use cached ${_cacheRoute!.segments[i].toPath()}");
+        pages.add(page);
       } else {
         useCached = false;
-        var prc = SegmentPageContext(_state!, segment);
-        var buildResult = await routeTable.executeSegment(prc);
-        print("build ${segment.toPath()}");
-        page = _buildPage(segment.toPath(),buildResult.pageWidget!);
+        SegmentPageResult buildResult;
+        (buildResult,page) = await _buildPageFromSegment(segment);
+        pages.add(page);
+        if (buildResult.isParent) {
+          var childSegment = PelicanRouteSegment.fromPathSegment(buildResult.defaultChild!);
+          // SegmentPageResult buildResult2;
+          // Page<dynamic> childPage;
+          var (buildResult2,childPage) = await _buildPageFromSegment(childSegment);
+          pages.add(childPage);
+        }
       }
-      pages.add(page);
     }
 
     _cacheRoute = _state;
@@ -113,6 +132,22 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
     _cachePages = pages;
     print('END Router.buildPages');
     return pages;
+  }
+
+  // returns actual page widget
+  childPageFor(Widget parentWidget) async {
+    // return Builder configured to find parentWidget in _cachePages and return the child widget
+    var iParent = _cachePages?.indexWhere((p) => (p as MaterialPage?)?.child == parentWidget) ?? -1;
+    var childPage = iParent >= 0 ? _cachePages!.elementAtOrNull(iParent+1) : null;
+    if (childPage!=null)
+      return (childPage as MaterialPage?)?.child;   // existing page widget
+    var childSegment = iParent>=0 ? _cacheRoute?.segments.elementAtOrNull(iParent+1) : null;
+    if (childSegment==null)
+      throw StateError("Failed to get child page. Missing child segment");
+    SegmentPageResult buildResult;
+    (buildResult,childPage) = await _buildPageFromSegment(childSegment);
+    _cachePages!.add(childPage);
+    return (childPage as MaterialPage?)?.child;     // new page widget
   }
 
   // bool _onPopPage(Route<dynamic> route, dynamic result) {
@@ -231,11 +266,11 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   void appendPathRedirect(PathRedirect redirect) {
     routeTable.redirects.add(redirect);
   }
-  
+
   void prependPathRedirect(PathRedirect redirect) {
     routeTable.redirects.insert(0,redirect);
   }
-  
+
   void removePathRedirect(PathRedirect redirect) {
     routeTable.redirects.remove(redirect);
   }
