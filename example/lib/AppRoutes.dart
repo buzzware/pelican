@@ -39,7 +39,7 @@ class AppRoutes {
         {
           LOADING_PAGE: (ctx) async => ctx.page(LoadingPage()),
           ENTRANCE_PAGE: (ctx) async => ctx.page(EntrancePage()),
-          MAIN_PAGE: (ctx) async => ctx.page(MainPage()),
+          MAIN_PAGE: (ctx) async => ctx.parentPage(MainPage(),defaultChild: PAGE_ONE),
           PAGE_ONE: (ctx) async => ctx.page(PageOne()),
           PAGE_TWO: (ctx) async => ctx.page(PageTwo()),
         },

@@ -1,3 +1,5 @@
+import 'package:example/AppCommon.dart';
+import 'package:example/AppRoutes.dart';
 import 'package:flutter/material.dart';
 
 import 'PageOne.dart';
@@ -31,21 +33,23 @@ class MainPage extends StatelessWidget {
             ListTile(
               title: const Text('One'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PageOne()),
-                );
+                AppCommon.router.goto("/${AppRoutes.MAIN_PAGE}/${AppRoutes.PAGE_ONE}");
+                // Navigator.pop(context);
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => PageOne()),
+                // );
               },
             ),
             ListTile(
               title: const Text('Two'),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => PageTwo()),
-                );
+                AppCommon.router.goto("/${AppRoutes.MAIN_PAGE}/${AppRoutes.PAGE_TWO}");
+                // Navigator.pop(context);
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(builder: (context) => PageTwo()),
+                // );
               },
             ),
           ],
