@@ -7,6 +7,7 @@ import 'package:pelican/pelican.dart';
 
 import 'EntrancePage.dart';
 import 'LoadingPage.dart';
+import 'MainPage.dart';
 import 'PageOne.dart';
 import 'PageTwo.dart';
 
@@ -18,6 +19,7 @@ class AppRoutes {
 
   static const LOADING_PAGE = 'loading';
   static const ENTRANCE_PAGE = 'entrance';
+  static const MAIN_PAGE = 'main';
   static const PAGE_ONE = 'page_one';
   static const PAGE_TWO = 'page_two';
 
@@ -37,13 +39,14 @@ class AppRoutes {
         {
           LOADING_PAGE: (ctx) async => ctx.page(LoadingPage()),
           ENTRANCE_PAGE: (ctx) async => ctx.page(EntrancePage()),
+          MAIN_PAGE: (ctx) async => ctx.page(MainPage()),
           PAGE_ONE: (ctx) async => ctx.page(PageOne()),
           PAGE_TWO: (ctx) async => ctx.page(PageTwo()),
         },
         redirects: [
           PathRedirect.fromTo(ROOT_PATH,TRIAGE_PATH),
           PathRedirect(TRIAGE_PATH, (ctx) async {
-            return ctx.toRootPage(ENTRANCE_PAGE);
+            return ctx.toRootPage(MAIN_PAGE);
           }),
           PathRedirect(RANDOM_PAGE_PATH, (ctx) async {
             if (Random().nextInt(2)==0)
