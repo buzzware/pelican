@@ -55,7 +55,7 @@ class MainPage extends StatelessWidget {
           ],
         ),
       ),
-      body: const Center(
+      body: AppCommon.router.childPageFor(this) ?? const Center(
         child: Text(
           'Welcome to Main Page',
           style: TextStyle(fontSize: 24),

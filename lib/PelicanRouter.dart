@@ -109,45 +109,37 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
         SegmentPageResult buildResult;
         (buildResult,page) = await _buildPageFromSegment(segment);
         pages.add(page);
-        if (buildResult.isParent) {
-          var childSegment = PelicanRouteSegment.fromPathSegment(buildResult.defaultChild!);
-          // SegmentPageResult buildResult2;
-          // Page<dynamic> childPage;
-          var (buildResult2,childPage) = await _buildPageFromSegment(childSegment);
+        var existingChildSegment = _state!.segments.elementAtOrNull(i+1);
+        if (buildResult.isParent && existingChildSegment==null) { // added parent page and child segment is missing, so
+          var defaultChildSegment = PelicanRouteSegment.fromPathSegment(buildResult.defaultChild!);
+          var (buildResult2,childPage) = await _buildPageFromSegment(defaultChildSegment);
           pages.add(childPage);
+          _state = _state!.pushSegment(defaultChildSegment);
+          break;
         }
       }
     }
-
     _cacheRoute = _state;
-    // var originalPages = _cachePages;
-    // if (originalPages?.isNotEmpty ?? false) {
-    //   originalPages!.reversed.forEach((page) {
-    //     if (pages.contains(page))
-    //       return;
-    //     var widget = as<MaterialPage<dynamic>>(page)?.child;
-    //     //as<Disposable>(widget)?.onDispose();
-    //   });
-    // }
     _cachePages = pages;
     print('END Router.buildPages');
     return pages;
   }
 
   // returns actual page widget
-  childPageFor(Widget parentWidget) async {
+  childPageFor(Widget parentWidget) {
     // return Builder configured to find parentWidget in _cachePages and return the child widget
     var iParent = _cachePages?.indexWhere((p) => (p as MaterialPage?)?.child == parentWidget) ?? -1;
     var childPage = iParent >= 0 ? _cachePages!.elementAtOrNull(iParent+1) : null;
-    if (childPage!=null)
-      return (childPage as MaterialPage?)?.child;   // existing page widget
-    var childSegment = iParent>=0 ? _cacheRoute?.segments.elementAtOrNull(iParent+1) : null;
-    if (childSegment==null)
-      throw StateError("Failed to get child page. Missing child segment");
-    SegmentPageResult buildResult;
-    (buildResult,childPage) = await _buildPageFromSegment(childSegment);
-    _cachePages!.add(childPage);
-    return (childPage as MaterialPage?)?.child;     // new page widget
+    return (childPage as MaterialPage?)?.child;
+    // if (childPage!=null)
+    //   return (childPage as MaterialPage?)?.child;   // existing page widget
+    // var childSegment = iParent>=0 ? _cacheRoute?.segments.elementAtOrNull(iParent+1) : null;
+    // if (childSegment==null)
+    //   throw StateError("Failed to get child page. Missing child segment");
+    // SegmentPageResult buildResult;
+    // (buildResult,childPage) = await _buildPageFromSegment(childSegment);
+    // _cachePages!.add(childPage);
+    // return (childPage as MaterialPage?)?.child;     // new page widget
   }
 
   // bool _onPopPage(Route<dynamic> route, dynamic result) {
