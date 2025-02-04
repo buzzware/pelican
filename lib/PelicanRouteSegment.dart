@@ -15,12 +15,14 @@ class PelicanRouteSegment {
   late final String name;
   late final Map<String,String?> params;
   late final Map<String,String?> options;
+  late final PelicanRouteSegment? child;
 
   PelicanRouteSegment(
       this.name,
       [
-      Map<String,String?>? params,
-      Map<String,String?>? options
+        Map<String,String?>? params,
+        Map<String,String?>? options,
+        this.child
       ]
   ) {
     this.params = Map.unmodifiable(params ?? {});
@@ -30,12 +32,14 @@ class PelicanRouteSegment {
   copyWith({
     String? name,
     Map<String,String?>? params,
-    Map<String,String?>? options
+    Map<String,String?>? options,
+    PelicanRouteSegment? child
   }) {
     return PelicanRouteSegment(
       name ?? this.name,
       params ?? this.params,
-      options ?? this.options
+      options ?? this.options,
+      child ?? this.child
     );
   }
 
@@ -55,7 +59,9 @@ class PelicanRouteSegment {
     return parts[0];
   }
 
-  PelicanRouteSegment.fromPathSegment(String path) {
+  PelicanRouteSegment.fromPathSegmentSub(String path, [PelicanRouteSegment? child]) {
+    if (path.contains('@'))
+      throw ArgumentError('incoming path should never contain @ - use fromPathSegment');
     var parts = path.split('+');
     var nameAndParams = parts[0];
     var optionsStr = parts.length > 1 ? parts[1] : '';
@@ -63,9 +69,28 @@ class PelicanRouteSegment {
     name = nameAndParamsParts.isNotEmpty ? nameAndParamsParts.removeAt(0) : '';
     params = mapFromValues(nameAndParamsParts.join(';'));
     options = mapFromValues(optionsStr);
+    this.child = child;
   }
 
-  String toPath({PelicanRouteSegment? definition}) {
+  static PelicanRouteSegment fromPathSegment(String path) {
+    PelicanRouteSegment? child;
+    for (var p in path.split('@').reversed) {
+      child = PelicanRouteSegment.fromPathSegmentSub(p,child);
+    }
+    return child!;
+  }
+
+  String toPath() {
+    PelicanRouteSegment? curr = this;
+    var parts = [];
+    do {
+      parts.add(curr!.toPathSingle());
+      curr = curr.child;
+    } while (curr != null);
+    return parts.join('@');
+  }
+
+  String toPathSingle({PelicanRouteSegment? definition}) {
     if (definition!=null && definition.name != name) {
       throw Exception('definition name must match path name');
     }
