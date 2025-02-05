@@ -2,10 +2,8 @@ part of './pelican.dart';
 
 class SegmentPageResult {
   Widget? pageWidget;
-  bool isParent;
-  String? defaultChild;
 
-  SegmentPageResult({this.pageWidget,this.isParent = false,this.defaultChild});
+  SegmentPageResult({this.pageWidget});
 }
 
 @immutable

@@ -54,6 +54,17 @@ class PelicanRouteSegment {
     return curr;
   }
 
+  // includes self
+  Iterable<PelicanRouteSegment> get subSegments {
+    var result = List<PelicanRouteSegment>.empty(growable: true);
+    PelicanRouteSegment? curr = this;
+    do {
+      result.add(curr!);
+      curr = curr.child;
+    } while (curr != null);
+    return result;
+  }
+
   static Map<String,String> mapFromValues(String values) {
     return Map<String,String>.fromIterable(values.isEmpty ? [] : values.split(';'),key: (i) => i.split('=')[0],value: (i) {
     var parts = i.split('=');

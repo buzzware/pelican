@@ -76,8 +76,16 @@ class PelicanRoute {
   }
 
   bool equals(PelicanRoute other, {bool ignoreOptions = true}) {
-    var i = 0;
-    return segments.length==other.segments.length && segments.every((s) => s.equals(other.segments[i++],ignoreOptions: ignoreOptions));
+    var iSegment = 0;
+    return segments.length==other.segments.length && segments.every((s) {
+      var ss = s.subSegments;
+      var otherSegment = other.segments[iSegment++];
+      var iSub = 0;
+      return ss.every((s2) {
+        var otherSub = otherSegment.subSegments.elementAt(iSub++);
+        return s2.equals(otherSub,ignoreOptions: ignoreOptions);
+      });
+    });
   }
 
   static bool same(PelicanRoute? route1, PelicanRoute? route2, {bool ignoreOptions = true}) {

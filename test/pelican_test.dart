@@ -82,4 +82,18 @@ void main() {
 
     expect(await table.executeRedirects('/W'),'/A');
   });
+
+  group('PelicanRoute.equals',(){
+    test('check children match',() {
+      expect(PelicanRoute.fromPath('/Menu@A').equals(PelicanRoute.fromPath('/Menu@A')),isTrue);
+      expect(PelicanRoute.fromPath('/Menu@A').equals(PelicanRoute.fromPath('/Menu@B')),isFalse);
+      expect(PelicanRoute.fromPath('/Menu/X@A').equals(PelicanRoute.fromPath('/Menu/X@B')),isFalse);
+      expect(PelicanRoute.fromPath('/Menu/X@A').equals(PelicanRoute.fromPath('/Menu/X@A')),isTrue);
+    });
+    test('check params match, ignore option differences',() {
+      expect(PelicanRoute.fromPath('/Menu;x=1@A;y=2').equals(PelicanRoute.fromPath('/Menu;x=1@A;y=2')),isTrue);
+      expect(PelicanRoute.fromPath('/Menu;x=1+z=1@A;y=2').equals(PelicanRoute.fromPath('/Menu;x=1+z=8@A;y=2')),isTrue);
+      expect(PelicanRoute.fromPath('/Menu;x=2+z=1@A;y=2').equals(PelicanRoute.fromPath('/Menu;x=1+z=1@A;y=2')),isFalse);
+    });
+  });
 }
