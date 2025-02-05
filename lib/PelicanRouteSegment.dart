@@ -146,9 +146,23 @@ class PelicanRouteSegment {
     return [nameAndPars.join(';'), ops.join(';')].where((s) => s.isNotEmpty).join('+');
   }
 
-  bool equals(PelicanRouteSegment other, {bool ignoreOptions = true}) {
+  bool _equalsSingle(PelicanRouteSegment other, {bool ignoreOptions = true}) {
     return name == other.name && linkedMapsEqual(params,other.params) && (ignoreOptions || linkedMapsEqual(options,other.options));
   }
 
+  bool equals(PelicanRouteSegment other, {bool ignoreOptions = true, bool deep = true}) {
+    if (!deep)
+      return _equalsSingle(other,ignoreOptions: ignoreOptions);
+
+    var localSubs = subSegments;
+    var otherSubs = other.subSegments;
+    if (name != other.name || localSubs.length!=otherSubs.length)
+      return false;
+    var i = 0;
+    return localSubs.every((ls) {
+      var os = otherSubs.elementAt(i++);
+      return ls._equalsSingle(os);
+    });
+  }
 }
 
