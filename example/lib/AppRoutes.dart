@@ -37,11 +37,11 @@ class AppRoutes {
   static RouteTable define() {
     return RouteTable(
         {
-          LOADING_PAGE: (ctx) async => ctx.page(LoadingPage()),
-          ENTRANCE_PAGE: (ctx) async => ctx.page(EntrancePage()),
-          MAIN_PAGE: (ctx) async => ctx.parentPage(MainPage(),defaultChild: PAGE_ONE),
-          PAGE_ONE: (ctx) async => ctx.page(PageOne()),
-          PAGE_TWO: (ctx) async => ctx.page(PageTwo()),
+          LOADING_PAGE: RouteSpec((ctx) async => ctx.page(LoadingPage())),
+          ENTRANCE_PAGE: RouteSpec((ctx) async => ctx.page(EntrancePage())),
+          MAIN_PAGE: RouteSpec((ctx) async => ctx.page(const MainPage()),defaultChild: PAGE_ONE),
+          PAGE_ONE: RouteSpec((ctx) async => ctx.page(PageOne())),
+          PAGE_TWO: RouteSpec((ctx) async => ctx.page(PageTwo())),
         },
         redirects: [
           PathRedirect.fromTo(ROOT_PATH,TRIAGE_PATH),

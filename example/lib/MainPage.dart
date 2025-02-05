@@ -33,7 +33,7 @@ class MainPage extends StatelessWidget {
             ListTile(
               title: const Text('One'),
               onTap: () {
-                AppCommon.router.goto("/${AppRoutes.MAIN_PAGE}/${AppRoutes.PAGE_ONE}");
+                AppCommon.router.goto("/${AppRoutes.MAIN_PAGE}@${AppRoutes.PAGE_ONE}");
                 // Navigator.pop(context);
                 // Navigator.push(
                 //   context,
@@ -44,7 +44,7 @@ class MainPage extends StatelessWidget {
             ListTile(
               title: const Text('Two'),
               onTap: () {
-                AppCommon.router.goto("/${AppRoutes.MAIN_PAGE}/${AppRoutes.PAGE_TWO}");
+                AppCommon.router.goto("/${AppRoutes.MAIN_PAGE}@${AppRoutes.PAGE_TWO}");
                 // Navigator.pop(context);
                 // Navigator.push(
                 //   context,
@@ -55,12 +55,7 @@ class MainPage extends StatelessWidget {
           ],
         ),
       ),
-      body: AppCommon.router.childPageFor(this) ?? const Center(
-        child: Text(
-          'Welcome to Main Page',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
+      body: AppCommon.router.childPageFor(this)
     );
   }
 }

@@ -19,9 +19,9 @@ class SegmentPageContext {
     return SegmentPageResult(pageWidget: pageWidget);
   }
 
-  SegmentPageResult parentPage(Widget pageWidget, {required String defaultChild}) {
-    return SegmentPageResult(pageWidget: pageWidget, isParent: true, defaultChild: defaultChild);
-  }
+  // SegmentPageResult parentPage(Widget pageWidget, {required String defaultChild}) {
+  //   return SegmentPageResult(pageWidget: pageWidget, isParent: true, defaultChild: defaultChild);
+  // }
 }
 
 class PathRedirectResult {
@@ -97,20 +97,28 @@ typedef LoadingPageBuilder = Widget Function(BuildContext context);
 //typedef PathRedirect = Future<PathRedirectResult> Function(PathRedirectContext string);
 
 @immutable
-class SegmentTableEntry {
+class RouteSpec {
+  final SegmentPageBuilder builder;
+  final String? defaultChild;
+  const RouteSpec(this.builder,{this.defaultChild});
+}
+
+@immutable
+class RouteTableEntry {
   final SegmentPageBuilder builder;
   final PelicanRouteSegment segment;
-  const SegmentTableEntry(this.segment,this.builder);
+  final String? defaultChild;
+  const RouteTableEntry(this.segment,this.builder,{this.defaultChild});
 }
 
 @immutable
 class RouteTable {
   late final List<PathRedirect> redirects;
-  late final List<SegmentTableEntry> segments;
+  late final List<RouteTableEntry> entries;
 
-  RouteTable(Map<String, SegmentPageBuilder> segments,{List<PathRedirect>? redirects}) {
-    this.segments = segments.entries.map<SegmentTableEntry>((e) {
-      return SegmentTableEntry(PelicanRouteSegment.fromPathSegment(e.key),e.value);
+  RouteTable(Map<String, RouteSpec> entrySpecs,{List<PathRedirect>? redirects}) {
+    this.entries = entrySpecs.entries.map<RouteTableEntry>((e) {
+      return RouteTableEntry(PelicanRouteSegment.fromPathSegment(e.key),e.value.builder,defaultChild: e.value.defaultChild);
     }).toList();
     this.redirects = redirects ?? List<PathRedirect>.empty(growable: true);
   }
@@ -123,22 +131,67 @@ class RouteTable {
   //   }
   // }
 
-  SegmentPageBuilder? matchRoute(PelicanRouteSegment segment) {
-    for (var s in segments) {
-      if (s.segment.name==segment.name) {
-        return s.builder;
+  PelicanRoute expand(PelicanRoute route) {
+    var segments = List<PelicanRouteSegment>.from(route.segments);
+    var segmentChanged = false;
+    for (int i = 0; i < segments.length; i++) {
+      var routeSeg = segments[i];
+      var newSubs = List<PelicanRouteSegment>.empty(growable: true);
+      var subChanged = false;
+      PelicanRouteSegment? sub = routeSeg;
+      var parts = [];
+      do {
+        var tableEntry = matchEntry(sub!); //   entries.firstOrNull(e => e.segment.name == s.name
+        if (tableEntry==null)
+          throw ErrorDescription("Failed to match ${sub.toPath()}");
+        newSubs.add(sub);
+        // has a default and no child
+        if (tableEntry.defaultChild!=null && sub.child==null) {
+          newSubs.add(PelicanRouteSegment.fromPathSegment(tableEntry.defaultChild!));
+          subChanged = true;
+          segmentChanged = true;
+        }
+        sub = sub.child;
+      } while (sub != null);
+      if (subChanged) {
+        PelicanRouteSegment? child;
+        for (var sub in newSubs.reversed) {
+          var curr = sub;
+          if (sub.child!=child)
+            curr = sub.copyWith(child: child);
+          child = curr;
+        }
+        segments[i] = child!;
+      }
+    }
+    return segmentChanged ? route.copyWith(segments: segments) : route;
+  }
+
+  RouteTableEntry? matchEntry(PelicanRouteSegment segment) {
+    for (var e in entries) {
+      if (e.segment.name==segment.name) {
+        return e;
       }
     }
     return null;
   }
 
+  // SegmentPageBuilder? matchRoute(PelicanRouteSegment segment) {
+  //   for (var s in entries) {
+  //     if (s.segment.name==segment.name) {
+  //       return s.builder;
+  //     }
+  //   }
+  //   return null;
+  // }
+
   Future<SegmentPageResult> executeSegment(SegmentPageContext context) async {
     print("executeSegment ${context.segment!.toPath()}");
-    var builder = matchRoute(context.segment!);
-    if (builder==null) {
+    var entry = matchEntry(context.segment!);
+    if (entry==null) {
       throw Exception("Segment route not matched");
     }
-    SegmentPageResult buildResult = await builder(context);
+    SegmentPageResult buildResult = await entry.builder(context);
     return buildResult;
   }
 

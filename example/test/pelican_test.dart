@@ -40,9 +40,9 @@ void main() {
   test('redirects',() async {
     var table = RouteTable(
       {
-        'A': (ctx) async => ctx.page(PageA()),
-        'B': (ctx) async => ctx.page(PageB()),
-        'C': (ctx) async => ctx.page(PageC()),
+        'A': RouteSpec((ctx) async => ctx.page(PageA())),
+        'B': RouteSpec((ctx) async => ctx.page(PageB())),
+        'C': RouteSpec((ctx) async => ctx.page(PageC())),
       },
       redirects: [
         PathRedirect('/X',(ctx) async => ctx.toRootPage('A')),

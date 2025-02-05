@@ -26,5 +26,4 @@ void main() {
       expect(PelicanRouteSegment.fromPathSegment(test_path).toPath(), test_path);
     });
   });
-
 }

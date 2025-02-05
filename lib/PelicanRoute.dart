@@ -8,6 +8,10 @@ class PelicanRoute {
     _segments = List.unmodifiable(segments);
   }
 
+  PelicanRoute copyWith({List<PelicanRouteSegment>? segments}) {
+    return PelicanRoute(segments?.toList() ?? this.segments);
+  }
+
   String toPath() {
     var parts = segments.map<String>((s) => s.toPath()).join('/');
     var result = "/$parts";

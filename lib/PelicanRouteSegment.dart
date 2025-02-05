@@ -44,6 +44,16 @@ class PelicanRouteSegment {
   }
 
 
+  PelicanRouteSegment? getChild([int index = 0]) {
+    PelicanRouteSegment? curr = this;
+    for (var i=0; i<=index;i++) {
+      curr = curr!.child;
+      if (curr==null)
+        break;
+    }
+    return curr;
+  }
+
   static Map<String,String> mapFromValues(String values) {
     return Map<String,String>.fromIterable(values.isEmpty ? [] : values.split(';'),key: (i) => i.split('=')[0],value: (i) {
     var parts = i.split('=');

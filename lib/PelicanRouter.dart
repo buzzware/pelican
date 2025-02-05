@@ -3,7 +3,7 @@ part of './pelican.dart';
 class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, PopNavigatorRouterDelegateMixin<PelicanRoute> {
 
   late final PelicanRouteParser parser;
-  PelicanRoute? _state;
+  PelicanRoute? _route;
   List<Page>? _pages;
   late final RouteTable routeTable;
 
@@ -44,8 +44,8 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   }
 
   @override
-  PelicanRoute? get currentConfiguration {
-    return _state;
+  PelicanRoute? get route {
+    return _route;
   }
 
   Widget? get currentPage {
@@ -67,10 +67,11 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   @override
   Future<void> setNewRoutePath(PelicanRoute route) async {
     print("setNewRoutePath ${route.toPath()}");
-    if (PelicanRoute.same(_state,route)) {
+    route = routeTable.expand(route);
+    if (PelicanRoute.same(_route,route)) {
       return;
     }
-    _state = route;
+    _route = route;
     _pages = await buildPages();
     notifyListeners();
   }
@@ -84,7 +85,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   }
 
   Future<(SegmentPageResult,Page<dynamic>)> _buildPageFromSegment(segment) async {
-    var prc = SegmentPageContext(_state!, segment);
+    var prc = SegmentPageContext(_route!, segment);
     var buildResult = await routeTable.executeSegment(prc);
     var page = _buildPage(segment.toPath(), buildResult.pageWidget!);
     return (buildResult,page);
@@ -95,51 +96,37 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
     print("_cachePages is ${_cachePages==null ? 'not' : ''} set");
     var pages = List<Page<dynamic>>.empty(growable: true);
     var useCached = _cacheRoute!=null;
-    for (var i=0; i<_state!.segments.length; i++) {
-      var segment = _state!.segments[i];
+    for (var i=0; i<_route!.segments.length; i++) {
+      var segment = _route!.segments[i];
       Page page;
-      // this approach isn't complete because any childSegments will mean  _cachePages is longer than _cacheRoute
-      // Another approach is to store the child page on the parent page using IParentPage that must be implemented
       if (useCached && _cacheRoute!.segments.length>i && segment.equals(_cacheRoute!.segments[i])) {
         page = _cachePages![i];
         print("Use cached ${_cacheRoute!.segments[i].toPath()}");
-        pages.add(page);
       } else {
         useCached = false;
         SegmentPageResult buildResult;
         (buildResult,page) = await _buildPageFromSegment(segment);
-        pages.add(page);
-        var existingChildSegment = _state!.segments.elementAtOrNull(i+1);
-        if (buildResult.isParent && existingChildSegment==null) { // added parent page and child segment is missing, so
-          var defaultChildSegment = PelicanRouteSegment.fromPathSegment(buildResult.defaultChild!);
-          var (buildResult2,childPage) = await _buildPageFromSegment(defaultChildSegment);
-          pages.add(childPage);
-          _state = _state!.pushSegment(defaultChildSegment);
-          break;
-        }
       }
+      pages.add(page);
     }
-    _cacheRoute = _state;
+    _cacheRoute = _route;
     _cachePages = pages;
     print('END Router.buildPages');
     return pages;
   }
 
   // returns actual page widget
-  childPageFor(Widget parentWidget) {
+  Widget childPageFor(Widget parentWidget, [int index = 0]) {
     // return Builder configured to find parentWidget in _cachePages and return the child widget
-    var iParent = _cachePages?.indexWhere((p) => (p as MaterialPage?)?.child == parentWidget) ?? -1;
-    var childPage = iParent >= 0 ? _cachePages!.elementAtOrNull(iParent+1) : null;
-    return (childPage as MaterialPage?)?.child;
-    // if (childPage!=null)
-    //   return (childPage as MaterialPage?)?.child;   // existing page widget
-    // var childSegment = iParent>=0 ? _cacheRoute?.segments.elementAtOrNull(iParent+1) : null;
-    // if (childSegment==null)
-    //   throw StateError("Failed to get child page. Missing child segment");
-    // SegmentPageResult buildResult;
-    // (buildResult,childPage) = await _buildPageFromSegment(childSegment);
-    // _cachePages!.add(childPage);
-    // return (childPage as MaterialPage?)?.child;     // new page widget
+    var iParentPage = _cachePages?.indexWhere((p) => (p as MaterialPage?)?.child == parentWidget) ?? -1;
+    var parentSegment = _cacheRoute!.segments[iParentPage];
+    var subSegment = parentSegment.getChild(index);
+
+    var prc = SegmentPageContext(_route!, subSegment);
+    var buildResultPromise = routeTable.executeSegment(prc);
+    return FutureBuilder(future: buildResultPromise, builder: (context, snapshot) {
+      return snapshot.data?.pageWidget ?? Container();
+    });
   }
 
   // bool _onPopPage(Route<dynamic> route, dynamic result) {
@@ -152,7 +139,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   // }
 
   List<Page> servePages(BuildContext context) {
-    if (_state == null || ((_pages?.length ?? 0) == 0)) {
+    if (_route == null || ((_pages?.length ?? 0) == 0)) {
       return List<Page<dynamic>>.from([_buildPage("LoadingPage", loadingPageBuilder!=null ? loadingPageBuilder!(context) : DefaultLoadingPage())]);
     } else {
       return _pages!;
@@ -181,25 +168,25 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   }
 
   void push(String segmentPath) {
-    setNewRoutePath(_state!.pushSegment(PelicanRouteSegment.fromPathSegment(segmentPath)));
+    setNewRoutePath(_route!.pushSegment(PelicanRouteSegment.fromPathSegment(segmentPath)));
   }
 
   PelicanRouteSegment pop() {
-    if (_state?.segments.isEmpty ?? true) {
+    if (_route?.segments.isEmpty ?? true) {
       throw Exception("Can't pop when stack is empty");
     }
-    final poppedItem = _state!.segments.isNotEmpty ? _state!.segments.last : null;
+    final poppedItem = _route!.segments.isNotEmpty ? _route!.segments.last : null;
     print("pop ${poppedItem!.toPath()}");
-    setNewRoutePath(_state!.popSegment());
+    setNewRoutePath(_route!.popSegment());
     return poppedItem;
   }
 
   void _onDidRemovePage(Page<Object?> page) {
     if (page.name!=null)
-      setNewRoutePath(_state!.remove(page.name!));
+      setNewRoutePath(_route!.remove(page.name!));
   }
 
-  bool get canPop => (_state?.segments.length ?? 0)>1;
+  bool get canPop => (_route?.segments.length ?? 0)>1;
 
   Future<void> goto(String path) async {
     var newPath = await routeTable.executeRedirects(path);
@@ -207,7 +194,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
       return;
     }
     var route = PelicanRoute.fromPath(newPath);
-    if (PelicanRoute.same(route,_state)) {
+    if (PelicanRoute.same(route,_route)) {
       return;
     }
     setNewRoutePath(route);
@@ -218,16 +205,16 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   }
 
   void replaceSegment(PelicanRouteSegment segment) {
-    var route = _state!.popSegment();
+    var route = _route!.popSegment();
     route = route.pushSegment(segment);
     setNewRoutePath(route);
   }
 
   Page? getPage(String segmentName) {
-    if (_state==null) {
+    if (_route==null) {
       return null;
     }
-    for (var i=_state!.segments.length-1; i>=0; i--) {
+    for (var i=_route!.segments.length-1; i>=0; i--) {
       if (_cacheRoute!.segments.length > i && _cacheRoute!.segments[i].name==segmentName) {
         return _cachePages![i];
       }
@@ -240,10 +227,10 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   }
 
   void replaceParam(String param, String? value) {
-    if (_state?.segments.isEmpty ?? true) {
+    if (_route?.segments.isEmpty ?? true) {
       throw Exception("Can't replaceParam on an empty route");
     }
-    var leaf = _state!.segments.last;
+    var leaf = _route!.segments.last;
     var params = leaf.params;
     if (params[param]==value) {
       return;
