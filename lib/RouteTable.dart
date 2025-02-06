@@ -8,18 +8,13 @@ class SegmentPageResult {
 
 @immutable
 class SegmentPageContext {
-  final PelicanRoute? route;
   final PelicanRouteSegment? segment;
 
-  const SegmentPageContext(this.route,this.segment);
+  const SegmentPageContext(this.segment);
 
   SegmentPageResult page(Widget pageWidget) {
     return SegmentPageResult(pageWidget: pageWidget);
   }
-
-  // SegmentPageResult parentPage(Widget pageWidget, {required String defaultChild}) {
-  //   return SegmentPageResult(pageWidget: pageWidget, isParent: true, defaultChild: defaultChild);
-  // }
 }
 
 class PathRedirectResult {

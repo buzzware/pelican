@@ -17,7 +17,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
 
-  final routeInformationProvider = PelicanRouter.platformRouteInformationProviderWithInitialPath(AppRoutes.TRIAGE_PATH);
+  final routeInformationProvider = PelicanRouter.platformRouteInformationProviderWithInitialPath2();
 
   // This widget is the root of your application.
   @override
@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
       routerDelegate: AppCommon.router,
       routeInformationParser: AppCommon.router.parser,
-      //routeInformationProvider: routeInformationProvider
+      routeInformationProvider: routeInformationProvider
     );
   }
 }

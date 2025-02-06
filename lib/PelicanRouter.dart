@@ -1,5 +1,30 @@
 part of './pelican.dart';
 
+/// A [RouteInformationProvider] that provides a default route
+/// if the app is opened at the root path ("/") or with no path at all.
+/// Otherwise, it uses the browser's or deep link's current route.
+// class DefaultRouteInformationProvider extends PlatformRouteInformationProvider {
+//   DefaultRouteInformationProvider({
+//     required String defaultRoute,
+//     RouteInformation? restoredRouteInformation,
+//   }) : super(
+//     // If the current URL is "/" or empty, use [defaultRoute] as the initial route.
+//     initialRouteInformation: _getInitialRouteInformation(defaultRoute),
+//     res
+//     restoredRouteInformation: restoredRouteInformation,
+//   );
+//
+//   /// Returns a [RouteInformation] based on the browser's URL.
+//   /// If the URL is "/" or empty, returns a [RouteInformation] with the [defaultRoute].
+//   static RouteInformation _getInitialRouteInformation(String defaultRoute) {
+//     final String path = Uri.base.path;
+//     if (path == '/' || path.isEmpty) {
+//       return RouteInformation(location: defaultRoute);
+//     }
+//     return RouteInformation(location: path);
+//   }
+// }
+
 class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, PopNavigatorRouterDelegateMixin<PelicanRoute> {
 
   late final PelicanRouteParser parser;
@@ -25,6 +50,19 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
                 : Uri.parse(path)
         )
     );
+  }
+
+  static PlatformRouteInformationProvider platformRouteInformationProviderWithInitialPath2({String? defaultPath, String? initialPath}) {
+    Uri uri;
+    Uri initialUri;
+    if (kIsWeb)
+      initialUri = (initialPath ?? '') == '' ? Uri.base : Uri.parse(initialPath!);
+    else
+      initialUri = (initialPath ?? '') == '' ? Uri.parse('/') : Uri.parse(initialPath!);
+    var defaultUri = (defaultPath ?? '')=='' ? Uri.parse('/') : Uri.parse(defaultPath!);
+    uri = initialUri.path == '/' ? defaultUri : initialUri;
+    print("platformRouteInformationProviderWithInitialPath2: ${uri}");
+    return PlatformRouteInformationProvider(initialRouteInformation: RouteInformation(uri: uri));
   }
 
   PelicanRouter(
@@ -68,31 +106,36 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   Future<void> setNewRoutePath(PelicanRoute route) async {
     print("setNewRoutePath ${route.toPath()}");
     route = routeTable.expand(route);
-    if (PelicanRoute.same(_route,route)) {
-      return;
-    }
+    // if (PelicanRoute.same(_route,route)) {
+    //   print("setNewRoutePath exiting because route has not changed");
+    //   return;
+    // }
+    print("setNewRoutePath setting ${route.toPath()}");
     _route = route;
     _pages = await buildPages();
     notifyListeners();
   }
 
   Page<dynamic> _buildPage(String key, Widget widget) {
+    print("_buildPage ${key}");
     return MaterialPage<dynamic>(
         key: ValueKey(key),
         name: key,
-        child: widget
+        child: widget,
+
     );
   }
 
-  Future<(SegmentPageResult,Page<dynamic>)> _buildPageFromSegment(segment) async {
-    var prc = SegmentPageContext(_route!, segment);
+  Future<(SegmentPageResult,Page<dynamic>)> _buildPageFromSegment(segment,{PelicanRoute? route}) async {
+    var prc = SegmentPageContext(segment);
     var buildResult = await routeTable.executeSegment(prc);
-    var page = _buildPage(segment.toPath(), buildResult.pageWidget!);
+    var path = route?.toPath() ?? '/'+segment.toPath();
+    var page = _buildPage(path, buildResult.pageWidget!);
     return (buildResult,page);
   }
 
   Future<List<Page<dynamic>>> buildPages() async {
-    print('BEGIN Router.buildPages');
+    print('BEGIN Router.buildPages ${_route?.toPath()}');
     print("_cachePages is ${_cachePages==null ? 'not' : ''} set");
     var pages = List<Page<dynamic>>.empty(growable: true);
     var useCached = _cacheRoute!=null;
@@ -105,7 +148,8 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
       } else {
         useCached = false;
         SegmentPageResult buildResult;
-        (buildResult,page) = await _buildPageFromSegment(segment);
+        var route = PelicanRoute(_route!.segments.getRange(0,i+1).toList());
+        (buildResult,page) = await _buildPageFromSegment(segment,route: route);
       }
       pages.add(page);
     }
@@ -122,7 +166,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
     var parentSegment = _cacheRoute!.segments[iParentPage];
     var subSegment = parentSegment.getChild(index);
 
-    var prc = SegmentPageContext(_route!, subSegment);
+    var prc = SegmentPageContext(subSegment);
     var buildResultPromise = routeTable.executeSegment(prc);
     return FutureBuilder(future: buildResultPromise, builder: (context, snapshot) {
       return snapshot.data?.pageWidget ?? Container();
@@ -140,7 +184,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
 
   List<Page> servePages(BuildContext context) {
     if (_route == null || ((_pages?.length ?? 0) == 0)) {
-      return List<Page<dynamic>>.from([_buildPage("LoadingPage", loadingPageBuilder!=null ? loadingPageBuilder!(context) : DefaultLoadingPage())]);
+      return List<Page<dynamic>>.from([_buildPage("/LoadingPage", loadingPageBuilder!=null ? loadingPageBuilder!(context) : DefaultLoadingPage())]);
     } else {
       return _pages!;
     }

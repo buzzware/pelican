@@ -9,7 +9,8 @@ class PelicanRouteParser extends RouteInformationParser<PelicanRoute> {
   @override
   Future<PelicanRoute> parseRouteInformation(RouteInformation routeInformation) async {
     print('parseRouteInformation RouteInformation ${routeInformation.uri}');
-    var path = await router.routeTable.executeRedirects(routeInformation.uri.toString());
+    String? path = routeInformation.uri.path;
+    path = await router.routeTable.executeRedirects(path);
     if (path==null)
       throw ArgumentError("Redirected to null - cannot route");
     // var route = PelicanRoute.fromPath(routeInformation.uri.toString());
@@ -20,11 +21,12 @@ class PelicanRouteParser extends RouteInformationParser<PelicanRoute> {
   // PelicanRoute -> RouteInformation
   @override
   RouteInformation? restoreRouteInformation(PelicanRoute route) {
-    print('restoreRouteInformation');
     var path = route.toPath();
-    print('restoreRouteInformation $path');
+    print('restoreRouteInformation route $path');
+    var uri = Uri.parse(path);
+    print('restoreRouteInformation $uri');
     return RouteInformation(
-      uri: Uri.parse(path),
+      uri: uri
     );
   }
 }
