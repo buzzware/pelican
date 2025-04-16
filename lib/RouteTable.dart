@@ -128,6 +128,8 @@ class RouteTable {
       var pelicanPage = buildResult.pageWidget as IPelicanPage;
       pelicanPage.route = context.route;
       pelicanPage.segment = context.segment;
+      pelicanPage.params = context.segment?.params;
+      pelicanPage.options = context.segment?.options;
     }
     return buildResult;
   }
