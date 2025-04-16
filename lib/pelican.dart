@@ -5,17 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'BlankPage.dart';
 import 'DefaultLoadingPage.dart';
-//import 'package:get_it/get_it.dart';
 
-// import '../pages/BlankPage.dart';
-// import 'PelicanRoute.dart';
-// import 'PelicanRouteSegment.dart';
-// import 'PelicanRouterState.dart';
-// import 'PelicanUtilities.dart';
-// import 'TransitionDelegate.dart';
-
-
-
+part 'IPelicanPage.dart';
 part 'PelicanRoute.dart';
 part 'PelicanRouter.dart';
 //part 'PelicanRouterState.dart';

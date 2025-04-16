@@ -123,6 +123,8 @@ class RouteTable {
       throw Exception("Segment route not matched");
     }
     SegmentPageResult buildResult = await builder(context);
+    (buildResult.pageWidget as IPelicanPage?)?.route = context.route;
+    (buildResult.pageWidget as IPelicanPage?)?.segment = context.segment;
     return buildResult;
   }
 
