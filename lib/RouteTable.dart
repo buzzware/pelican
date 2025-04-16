@@ -58,14 +58,21 @@ class PathRedirectContext {
 }
 
 class PathRedirect {
-  String path;
+  String? path;
   Future<PathRedirectResult> Function(PathRedirectContext ctx) handler;
+  RegExp? pattern;
   PathRedirect(
-      this.path,
-      this.handler
-      );
+    this.path,
+    this.handler,
+    {this.pattern}
+  );
   bool matchesPath(String currPath) {
-    return currPath==path;
+    if (pattern!=null) {
+      return pattern!.hasMatch(currPath);
+    } else if (path!=null) {
+      return currPath == path;
+    }
+    return false;
   }
 
   static fromTo(String fromPath, String toPath) {
@@ -73,6 +80,9 @@ class PathRedirect {
   }
   static fromToRootPage(String fromPath, String toPage) {
     return PathRedirect(fromPath, (ctx) async => ctx.toRootPage(toPage));
+  }
+  static fromPattern(RegExp pattern, Future<PathRedirectResult> Function(PathRedirectContext ctx) handler) {
+    return PathRedirect(null, handler, pattern: pattern);
   }
 }
 

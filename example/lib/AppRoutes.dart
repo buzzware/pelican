@@ -23,7 +23,6 @@ class AppRoutes {
 
   static PelicanRouter setup() {
     return PelicanRouter(
-      '/',
       define(),
       loadingPageBuilder: (ctx) => LoadingPage(),
       observers: [

@@ -15,27 +15,7 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
 
   late final List<NavigatorObserver> observers;
 
-
-  //String loadingPageName;
-
   LoadingPageBuilder? loadingPageBuilder;
-
-  //late RouteInformationProvider routeProvider;
-  //final String _initialPath;
-  //bool _stateRouteInitialised = false;
-
-  // bool validateInitialPath(String initialPath) {
-  //   if (initialPath=='/')
-  //     return true;
-  //   try {
-  //     var route = PelicanRoute.fromPath(initialPath);
-  //     if (route.segments.any((s) => routeTable.matchRoute(s)==null))
-  //       return false;
-  //   } catch(e) {
-  //     return false;
-  //   }
-  //   return true;
-  // }
 
   static PlatformRouteInformationProvider platformRouteInformationProviderWithInitialPath(String path) {
     return PlatformRouteInformationProvider(
@@ -46,10 +26,8 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
         )
     );
   }
-
-
+  
   PelicanRouter(
-      String initialPath,
       this.routeTable,
       {
         this.observers = const [],
@@ -58,22 +36,15 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   ): super() {
     parser = PelicanRouteParser(this);
     navigatorKey = GlobalKey<NavigatorState>();
-    //routeProvider = platformRouteInformationProviderWithInitialPath(initialPath);
-    // if (!validateInitialPath(_initialPath)) {
-    //   throw ArgumentError("$_initialPath must match page(s)");
-    // }
-    //_state = PelicanRoute.fromPath('/');
   }
 
   @override
   void dispose() {
-    //_state.removeListener(notifyListeners);
     super.dispose();
   }
 
   @override
   PelicanRoute? get currentConfiguration {
-    //return null;  // disable state restoration
     return _state;
   }
 
@@ -87,12 +58,6 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   Future<void> setInitialRoutePath(PelicanRoute route) async {
     print("setInitialRoutePath ${route.toPath()}");
     await setNewRoutePath(route);
-    //routerState.route = _state.route;
-    // var newRoute = configuration.route!=null ? await routeTable.executeRedirectsRoute(configuration.route!) : null;
-    // if (!PelicanRoute.same(newRoute,configuration.route)) {
-    //   configuration.route = newRoute!;
-    //   await setNewRoutePath(configuration);
-    // }
   }
 
   @override
@@ -106,14 +71,6 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
     notifyListeners();
   }
 
-  // Future<void> initStateRoute() async {
-  //   print('initStateRoute');
-  //   var newPath = await routeTable.executeRedirects(_initialPath);
-  //   if (newPath != null) {
-  //     _state.route = PelicanRoute.fromPath(newPath);
-  //   }
-  // }
-
   Page<dynamic> _buildPage(String key, Widget widget) {
     return MaterialPage<dynamic>(
         key: ValueKey(key),
@@ -125,10 +82,6 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   Future<List<Page<dynamic>>> buildPages() async {
     print('BEGIN Router.buildPages');
     print("_cachePages is ${_cachePages==null ? 'not' : ''} set");
-    // if (!_stateRouteInitialised) {
-    //   _stateRouteInitialised = true;
-    //   await initStateRoute();
-    // }
     var pages = List<Page<dynamic>>.empty(growable: true);
     var useCached = _cacheRoute!=null;
     for (var i=0; i<_state!.segments.length; i++) {
@@ -182,39 +135,22 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
   // build a Navigator
   @override
   Widget build(BuildContext context) {
-    // return FutureBuilder(
-    //   future: buildPages(context),
-    //   initialData: [
-    //     MaterialPage<dynamic>(child: SizedBox(
-    //       width: double.infinity,
-    //       height: double.infinity,
-    //       //child: Text('Please Wait')
-    //     )),
-    //   ],
-    //   builder: (context, snapshot) {
-    //     if (snapshot.hasError) {
-    //       return Container(child: Text(snapshot.error.toString()));
-    //     } else if (snapshot.hasData) {
-          return Navigator(
-            key: navigatorKey,
-            transitionDelegate: NoAnimationTransitionDelegate(),
-            pages: servePages(context),   //snapshot.data!, // List<Page<dynamic>>.from([BlankPage()]),
-            onDidRemovePage: _onDidRemovePage,
-            observers: observers,
-            // onDidRemovePage: (Page<dynamic> page) {
-            //   // Check if it's the book details page being removed
-            //   if (page.key == ValueKey('bookDetails') ||
-            //       (page is MaterialPage && page.child is BookDetailsScreen)) {
-            //     _selectedBook = null;
-            //     show404 = false;
-            //     notifyListeners();
-            //   }
-            // }
-          );
-        // } else {
-        //   return const CircularProgressIndicator();
-        // }
-
+    return Navigator(
+      key: navigatorKey,
+      transitionDelegate: NoAnimationTransitionDelegate(),
+      pages: servePages(context),   //snapshot.data!, // List<Page<dynamic>>.from([BlankPage()]),
+      onDidRemovePage: _onDidRemovePage,
+      observers: observers,
+      // onDidRemovePage: (Page<dynamic> page) {
+      //   // Check if it's the book details page being removed
+      //   if (page.key == ValueKey('bookDetails') ||
+      //       (page is MaterialPage && page.child is BookDetailsScreen)) {
+      //     _selectedBook = null;
+      //     show404 = false;
+      //     notifyListeners();
+      //   }
+      // }
+    );
   }
 
   void push(String segmentPath) {
@@ -290,5 +226,17 @@ class PelicanRouter extends RouterDelegate<PelicanRoute> with ChangeNotifier, Po
     params[param] = value;
     var segment = leaf.copyWith(params: Map.unmodifiable(params));
     replaceSegment(segment);
+  }
+
+  void appendPathRedirect(PathRedirect redirect) {
+    routeTable.redirects.add(redirect);
+  }
+  
+  void prependPathRedirect(PathRedirect redirect) {
+    routeTable.redirects.insert(0,redirect);
+  }
+  
+  void removePathRedirect(PathRedirect redirect) {
+    routeTable.redirects.remove(redirect);
   }
 }
