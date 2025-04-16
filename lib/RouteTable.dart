@@ -123,8 +123,12 @@ class RouteTable {
       throw Exception("Segment route not matched");
     }
     SegmentPageResult buildResult = await builder(context);
-    (buildResult.pageWidget as IPelicanPage?)?.route = context.route;
-    (buildResult.pageWidget as IPelicanPage?)?.segment = context.segment;
+
+    if (buildResult.pageWidget is IPelicanPage) {
+      var pelicanPage = buildResult.pageWidget as IPelicanPage;
+      pelicanPage.route = context.route;
+      pelicanPage.segment = context.segment;
+    }
     return buildResult;
   }
 
